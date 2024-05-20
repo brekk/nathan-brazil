@@ -1,0 +1,65 @@
+import type { Maybe } from "Maybe"
+import type { Random } from "Random"
+
+import { equals } from "Function"
+import List from "List"
+import { abs, add } from "Math"
+import { float } from "Random"
+
+
+
+export alias Matrix = List (List Float)
+
+isSquare :: Matrix -> Boolean
+export isSquare = (matrix) => {
+  x = List.length(matrix)
+  return List.all(
+    pipe(
+      List.length,
+      equals(x),
+    ),
+    matrix,
+  )
+}
+
+inUnitInterval :: Float -> Boolean
+inUnitInterval = (f) => f >= 0 && f <= 1
+
+isProbabilisticRow :: List Float -> Boolean
+isProbabilisticRow = (floats) => (
+  List.all(inUnitInterval, floats) && abs(List.reduce(add, 0, floats) - 1) < 0.0001
+)
+
+isProbabilistic :: Matrix -> Boolean
+export isProbabilistic = List.all(isProbabilisticRow)
+
+validate :: Matrix -> Boolean
+export validate = (m) => !List.isEmpty(m) && isProbabilistic(m) && isSquare(m)
+
+getRow :: Integer -> Matrix -> Maybe (List Float)
+export getRow = List.nth
+
+selectRow :: Random -> Integer -> Matrix -> Maybe Integer
+export selectRow = (r, i, m) => {
+  f = float(r)
+  return pipe(
+    getRow(i),
+    map(
+      pipe(
+        (row) => List.zip(List.range(0, List.length(row)), row),
+        List.reduce(
+          (stack, indexed) => where(indexed) {
+            #[index, x] =>
+              do {
+                sum = stack.sum + x
+                result = f <= sum ? index : stack.result
+                return { sum, result }
+              }
+          },
+          { sum: 0, result: 0 },
+        ),
+        .result,
+      ),
+    ),
+  )(m)
+}
