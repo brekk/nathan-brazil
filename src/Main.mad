@@ -1,0 +1,15 @@
+import Dict from "Dictionary"
+import IO from "IO"
+
+import { calculate } from "./NathanBrazil"
+
+
+
+main = () => {
+  d = {{ "a": 1, "b": 1, "c": 1 }}
+  IO.pTrace("insert existing?", Dict.insert("b", 2, d))
+  IO.pTrace("insert new?", Dict.insert("b", 2, d))
+  IO.pTrace("update existing?", Dict.update((i) => i + 1, "b", d))
+  IO.pTrace("update new?", Dict.update((i) => i + 1, "d", d))
+  calculate(["abcde", "fghij"]) |> IO.pTrace("CALCULATED?")
+}

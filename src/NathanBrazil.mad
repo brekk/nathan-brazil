@@ -1,0 +1,98 @@
+import type { Maybe } from "Maybe"
+
+import Dict from "Dictionary"
+import List from "List"
+import { Just, Nothing } from "Maybe"
+import String from "String"
+
+
+
+alias Letterbox = Dictionary String Short
+
+// type LetterStats = LetterStats(Short, Dictionary String Short)
+
+// freshStats :: {} -> LetterStats
+// freshStats = () => LetterStats(0, {{}})
+
+upsertKey :: String -> Letterbox -> Letterbox
+export upsertKey = (str, dict) => pipe(
+  Dict.get($, dict),
+  where {
+    Just(x) =>
+      x + 1
+
+    _ =>
+      1
+  },
+  Dict.insert(str, $, dict),
+)(str)
+
+countLetter :: Letterbox -> Maybe String -> Letterbox
+export countLetter = (dict, mString) => where(mString) {
+  Nothing =>
+    dict
+
+  Just(str) =>
+    upsertKey(str, dict)
+}
+
+type Stats = Stats(Letterbox, Letterbox, Letterbox, Letterbox, Letterbox)
+
+emptyStats :: {} -> Stats
+export emptyStats = () => Stats({{}}, {{}}, {{}}, {{}}, {{}})
+
+charToString :: Char -> String
+export charToString = String.appendChar($, "")
+
+consumeIndex :: Letterbox -> String -> Integer -> Letterbox
+export consumeIndex = (lStats, word, i) => pipe(
+  String.charAt(i < 0 ? String.length(word) - i : i),
+  map(charToString),
+  countLetter(lStats),
+)(word)
+
+segmentIndex :: Maybe Char -> Maybe Char -> String
+export segmentIndex = (mA, mB) => where(#[mA, mB]) {
+  #[Just(a), Just(b)] =>
+    charToString(a) ++ charToString(b)
+
+  _ =>
+    ""
+}
+
+consumeWord :: Stats -> String -> Stats
+export consumeWord = (wStats, word) => where(wStats) {
+  Stats(sA, sB, sM, sY, sZ) =>
+    do {
+      len = String.length(word)
+      _sA = consumeIndex(sA, word, 0)
+      _sB = consumeIndex(sB, word, 1)
+      _sM = {{}}
+      _sY = {{}}
+      _sZ = {{}}
+      mC0 = String.charAt(0, word)
+      mC1 = String.charAt(1, word)
+      di = segmentIndex(mC0, mC1)
+      pipe(
+        List.range(2),
+        map(
+          (j) => {
+            mC3 = String.charAt(j, word)
+            count = countLetter($, Just(di))
+            if (j < len - 2) do {
+              _sM := count(sM)
+            } else if (j < len - 1) do {
+              _sY := count(sY)
+            } else do {
+              _sZ := count(sZ)
+            }
+            di := segmentIndex(String.lastChar(di), mC3)
+          },
+        ),
+      )(len)
+      return Stats(_sA, _sB, _sM, _sY, _sZ)
+    }
+}
+
+calculate :: List String -> Stats
+export calculate = (words) => List.reduce(consumeWord, emptyStats(), words)
