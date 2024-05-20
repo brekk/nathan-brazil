@@ -11,5 +11,5 @@ main = () => {
   IO.pTrace("insert new?", Dict.insert("b", 2, d))
   IO.pTrace("update existing?", Dict.update((i) => i + 1, "b", d))
   IO.pTrace("update new?", Dict.update((i) => i + 1, "d", d))
-  calculate(["abcde", "fghij"]) |> IO.pTrace("CALCULATED?")
+  calculate(["abcde", "fghij", "flippant"]) |> IO.pTrace("CALCULATED?")
 }

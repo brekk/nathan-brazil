@@ -1,98 +1,77 @@
 import type { Maybe } from "Maybe"
 
 import Dict from "Dictionary"
+import { equals } from "Function"
 import List from "List"
 import { Just, Nothing } from "Maybe"
 import String from "String"
 
 
 
-alias Letterbox = Dictionary String Short
+/*
+ * words :: String
+ * refs  :: List String
+ */
+export type Fragment = Fragment(String, List String)
+/*
+ * data       :: List String
+ * stateSize  :: Integer 
+ * startWords :: List Fragment
+ * endWords   :: List Fragment
+ * corpus     :: Dictionary String Fragment
+ */
+export type Markov
+  = Markov(List String, Integer, List Fragment, List Fragment, Dictionary String Fragment)
 
-// type LetterStats = LetterStats(Short, Dictionary String Short)
-
-// freshStats :: {} -> LetterStats
-// freshStats = () => LetterStats(0, {{}})
-
-upsertKey :: String -> Letterbox -> Letterbox
-export upsertKey = (str, dict) => pipe(
-  Dict.get($, dict),
-  where {
-    Just(x) =>
-      x + 1
-
-    _ =>
-      1
-  },
-  Dict.insert(str, $, dict),
-)(str)
-
-countLetter :: Letterbox -> Maybe String -> Letterbox
-export countLetter = (dict, mString) => where(mString) {
-  Nothing =>
-    dict
-
-  Just(str) =>
-    upsertKey(str, dict)
+fragmentWords :: Fragment -> String
+export fragmentWords = where {
+  Fragment(s, _) =>
+    s
 }
 
-type Stats = Stats(Letterbox, Letterbox, Letterbox, Letterbox, Letterbox)
-
-emptyStats :: {} -> Stats
-export emptyStats = () => Stats({{}}, {{}}, {{}}, {{}}, {{}})
-
-charToString :: Char -> String
-export charToString = String.appendChar($, "")
-
-consumeIndex :: Letterbox -> String -> Integer -> Letterbox
-export consumeIndex = (lStats, word, i) => pipe(
-  String.charAt(i < 0 ? String.length(word) - i : i),
-  map(charToString),
-  countLetter(lStats),
-)(word)
-
-segmentIndex :: Maybe Char -> Maybe Char -> String
-export segmentIndex = (mA, mB) => where(#[mA, mB]) {
-  #[Just(a), Just(b)] =>
-    charToString(a) ++ charToString(b)
-
-  _ =>
-    ""
+fragmentRefs :: Fragment -> List String
+export fragmentRefs = where {
+  Fragment(_, r) =>
+    r
 }
 
-consumeWord :: Stats -> String -> Stats
-export consumeWord = (wStats, word) => where(wStats) {
-  Stats(sA, sB, sM, sY, sZ) =>
-    do {
-      len = String.length(word)
-      _sA = consumeIndex(sA, word, 0)
-      _sB = consumeIndex(sB, word, 1)
-      _sM = {{}}
-      _sY = {{}}
-      _sZ = {{}}
-      mC0 = String.charAt(0, word)
-      mC1 = String.charAt(1, word)
-      di = segmentIndex(mC0, mC1)
-      pipe(
-        List.range(2),
-        map(
-          (j) => {
-            mC3 = String.charAt(j, word)
-            count = countLetter($, Just(di))
-            if (j < len - 2) do {
-              _sM := count(sM)
-            } else if (j < len - 1) do {
-              _sY := count(sY)
-            } else do {
-              _sZ := count(sZ)
-            }
-            di := segmentIndex(String.lastChar(di), mC3)
-          },
-        ),
-      )(len)
-      return Stats(_sA, _sB, _sM, _sY, _sZ)
+fragmentAddRef :: Fragment -> String -> Fragment
+fragmentAddRef = (frag, str) => where(frag) {
+  Fragment(s, r) =>
+    Fragment(s, List.append(str, r))
+}
+
+searchFragments :: List Fragment -> String -> Maybe Fragment
+export searchFragments = (frags, needle) => List.find(
+  pipe(
+    fragmentWords,
+    equals(needle),
+  ),
+  frags,
+)
+
+fragmentHasRef :: Fragment -> String -> Boolean
+export fragmentHasRef = (frag, x) => pipe(
+  fragmentRefs,
+  List.includes(x),
+)(frag)
+
+incorporate :: Integer -> List String -> Markov
+incorporate = (size, startWords, data) => map(
+  (item) => {
+    words = String.split(" ", item)
+    start = pipe(
+      List.slice(0, size),
+      String.join(" "),
+    )(words)
+    prevStart = searchFragments(startWords, start)
+    where(prevStart) {
+      Just(frag) =>
+        !fragmentHasRef(frag, item) ? fragmentAddRef(frag, item) : frag
+
+      Nothing =>
+        List.append(Fragment(start, [item]), startWords)
     }
-}
-
-calculate :: List String -> Stats
-export calculate = (words) => List.reduce(consumeWord, emptyStats(), words)
+  },
+  data,
+)
