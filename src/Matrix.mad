@@ -1,0 +1,117 @@
+import type { Maybe } from "Maybe"
+import type { Random } from "Random"
+
+import { always, equals } from "Function"
+import List from "List"
+import { abs, add } from "Math"
+import { Just, Nothing, fromMaybe } from "Maybe"
+import { float } from "Random"
+
+
+
+export alias Matrix a = List (List a)
+
+export alias Stochastic = Matrix Float
+
+create :: Integer -> Float -> Stochastic
+export create = (n, fill) => List.repeatWith((_) => List.repeatWith(always(fill), n), n)
+
+isSquare :: Stochastic -> Boolean
+export isSquare = (matrix) => {
+  x = List.length(matrix)
+  return List.all(
+    pipe(
+      List.length,
+      equals(x),
+    ),
+    matrix,
+  )
+}
+
+rows :: Stochastic -> Integer
+export rows = List.length
+
+columns :: Stochastic -> Integer
+export columns = (m) => pipe(
+  List.nth(0),
+  map(List.length),
+  fromMaybe(0),
+)(m)
+
+getCell :: Integer -> Integer -> Stochastic -> Maybe Float
+export getCell = (rowIndex, index, matrix) => pipe(
+  List.nth(rowIndex),
+  chain(List.nth(index)),
+)(matrix)
+
+setCell :: Integer -> Integer -> Float -> Stochastic -> Stochastic
+export setCell = (rowIndex, index, f, matrix) => List.mapWithIndex(
+  (row, x) => List.mapWithIndex(
+    (cell, y) => if (rowIndex == x && index == y) {
+      f
+    } else {
+      cell
+    },
+    row,
+  ),
+  matrix,
+)
+
+inUnitInterval :: Float -> Boolean
+export inUnitInterval = (f) => f >= 0 && f <= 1
+
+isProbabilisticRow :: List Float -> Boolean
+export isProbabilisticRow = (floats) => (
+  List.all(inUnitInterval, floats) && abs(List.reduce(add, 0, floats) - 1) < 0.0001
+)
+
+isProbabilistic :: Stochastic -> Boolean
+export isProbabilistic = List.all(isProbabilisticRow)
+
+validate :: Stochastic -> Boolean
+export validate = (m) => !List.isEmpty(m) && isProbabilistic(m) && isSquare(m)
+
+validateWithReason :: Stochastic -> Maybe String
+export validateWithReason = (m) => if (List.isEmpty(m)) {
+  Just("Matrix cannot be empty")
+} else if (!isProbabilistic(m)) {
+  Just("Matrix must have rows which add up to 1")
+} else if (!isSquare(m)) {
+  Just("Matrix must be square")
+} else {
+  Nothing
+}
+
+getRow :: Integer -> Stochastic -> Maybe (List Float)
+getRow = List.nth
+
+select :: Integer -> Float -> Stochastic -> Maybe Integer
+export select = (rowIndex, f, m) => pipe(
+  getRow(rowIndex),
+  map(
+    pipe(
+      (row) => List.zip(List.range(0, List.length(row)), row),
+      List.reduce(
+        (stack, indexed) => where(indexed) {
+          #[index, x] =>
+            do {
+              sum = stack.sum + x
+              result = f <= sum ? index : stack.result
+              return { sum, result }
+            }
+        },
+        { sum: 0, result: 0 },
+      ),
+      .result,
+    ),
+  ),
+)(m)
+
+selectFrom :: Random -> Integer -> Stochastic -> Maybe Integer
+export selectFrom = (r, i, m) => select(i, float(r), m)
+
+setRow :: Integer -> List Float -> Stochastic -> Stochastic
+export setRow = (rowIndex, newRow, matrix) => List.mapWithIndex(
+  (x, i) => i == rowIndex ? newRow : x,
+  matrix,
+)

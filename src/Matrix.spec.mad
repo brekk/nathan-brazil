@@ -1,0 +1,79 @@
+import type { Matrix } from "./Matrix"
+
+import List from "List"
+import { Just, Nothing } from "Maybe"
+import { generateFromString } from "Random"
+import { assertEquals, test } from "Test"
+
+import {
+  columns,
+  create,
+  getCell,
+  isSquare,
+  rows,
+  selectFrom,
+  setCell,
+  setRow,
+  validate,
+  validateWithReason,
+} from "./Matrix"
+
+
+
+test(
+  "isSquare",
+  () => do {
+    _ <- assertEquals(isSquare([[], [0, 1]]), false)
+    return assertEquals(isSquare([[1]]), true)
+  },
+)
+
+test("validate", () => assertEquals(validate([[0.5, 0, 0.5], [0, 1, 0], [0.25, 0, 0.75]]), true))
+
+test(
+  "selectFrom",
+  () => do {
+    seed = generateFromString("selectFrom")
+    m = [
+      [0.25, 0.25, 0.25, 0.25],
+      [0.25, 0.25, 0.25, 0.25],
+      [0.25, 0.25, 0.25, 0.25],
+      [0.25, 0.25, 0.25, 0.25],
+    ]
+    return assertEquals(selectFrom(seed, 0, m), Just(3))
+  },
+)
+
+test("rows", () => assertEquals(rows(create(5, 0)), 5))
+test("columns", () => assertEquals(columns(create(5, 0)), 5))
+
+test("getCell", () => assertEquals(getCell(2, 2, create(3, 0.3)), Just(0.3)))
+
+test(
+  "setCell",
+  () => assertEquals(
+    setCell(1, 1, 0.4, create(3, 0.1)),
+    [[0.1, 0.1, 0.1], [0.1, 0.4, 0.1], [0.1, 0.1, 0.1]],
+  ),
+)
+
+test(
+  "setRow",
+  () => assertEquals(
+    setRow(1, [0.1, 0.2, 0.3], create(3, 0.5)),
+    [[0.5, 0.5, 0.5], [0.1, 0.2, 0.3], [0.5, 0.5, 0.5]],
+  ),
+)
+
+test(
+  "validateWithReason",
+  () => do {
+    _ <- assertEquals(validateWithReason([[0.5, 0.5], [0.5, 0.5]]), Nothing)
+    _ <- assertEquals(
+      validateWithReason([[0.5, 0.5], [0.3, 0.1]]),
+      Just("Matrix must have rows which add up to 1"),
+    )
+    _ <- assertEquals(validateWithReason([[0, 1], [0, 1, 0]]), Just("Matrix must be square"))
+    return assertEquals(validateWithReason([]), Just("Matrix cannot be empty"))
+  },
+)

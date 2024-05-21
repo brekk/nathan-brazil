@@ -1,0 +1,96 @@
+import type { MarkovChain, MarkovError } from "@/Markov"
+import type { Stochastic } from "@/Matrix"
+
+import { Just, Nothing } from "Maybe"
+import { generateFromString } from "Random"
+import { assertEquals, test } from "Test"
+
+import {
+  InvalidStateValue,
+  MarkovChain,
+  NoValuesGiven,
+  ValueSizeNotMatched,
+  current,
+  invalidateWithReason,
+  isTerminal,
+  next,
+  nextValue,
+  transform,
+} from "@/Markov"
+
+
+
+test(
+  "invalidateWithReason",
+  () => do {
+    _ <- assertEquals(invalidateWithReason(MarkovChain([], [], 0)), Just(NoValuesGiven))
+
+    _ <- assertEquals(
+      invalidateWithReason(MarkovChain(["hey", "man"], [[0, 1, 0], [0, 0, 1], [1, 0, 0]], 0)),
+      Just(ValueSizeNotMatched),
+    )
+    _ <- assertEquals(
+      invalidateWithReason(MarkovChain(["hey", "man"], [[0, 1], [1, 0]], 3)),
+      Just(InvalidStateValue),
+    )
+    return assertEquals(
+      invalidateWithReason(
+        MarkovChain(["hey", "there", "man"], [[0, 1, 0], [0, 0, 1], [1, 0, 0]], 0),
+      ),
+      Nothing,
+    )
+  },
+)
+
+test(
+  "isTerminal",
+  () => assertEquals(
+    isTerminal(MarkovChain(["hey", "there", "man"], [[0, 1, 0], [0, 0, 1], [1, 0, 0]], 0)),
+    false,
+  ),
+)
+
+test(
+  "current",
+  () => assertEquals(
+    current(MarkovChain(["a", "b", "c"], [[0, 1, 0], [0, 0, 1], [1, 0, 0]], 0)),
+    Just("a"),
+  ),
+)
+
+test(
+  "next",
+  () => do {
+    seed = generateFromString("next")
+    return assertEquals(
+      next(seed, MarkovChain(["oh", "really", "cool"], [[0, 1, 0], [0, 0, 1], [1, 0, 0]], 0)),
+      MarkovChain(["oh", "really", "cool"], [[0, 1, 0], [0, 0, 1], [1, 0, 0]], 2),
+    )
+  },
+)
+
+test(
+  "nextValue",
+  () => do {
+    seed = generateFromString("next")
+    return assertEquals(
+      nextValue(seed, MarkovChain(["oh", "really", "cool"], [[0, 1, 0], [0, 0, 1], [1, 0, 0]], 0)),
+      Just("cool"),
+    )
+  },
+)
+
+test(
+  "transform",
+  () => do {
+    seed = generateFromString("next")
+    return assertEquals(
+      transform(
+        seed,
+        (_, _) => [[1, 0], [0, 1]],
+        MarkovChain(["shit", "ass"], [[0, 1], [1, 0]], 0),
+      ),
+      MarkovChain(["shit", "ass"], [[1, 0], [0, 1]], 1),
+    )
+  },
+)

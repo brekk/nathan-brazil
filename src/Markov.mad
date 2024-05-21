@@ -1,15 +1,79 @@
 import type { Either } from "Either"
 import type { Maybe } from "Maybe"
+import type { Random } from "Random"
 
-import type { Matrix } from "@/Matrix"
+import type { Stochastic } from "@/Matrix"
 
+import { equals } from "Function"
 import IO from "IO"
 import List from "List"
+import { Just, Nothing, fromMaybe } from "Maybe"
 import String from "String"
 
+import Matrix from "@/Matrix"
 
 
 
-// export type MarkovChain a = MarkovChain(List a, Matrix, Integer)
-// isTerminal :: Float -> Boolean
-// isTerminal = (f) => 
+export type MarkovError = NoValuesGiven | ValueSizeNotMatched | InvalidStateValue
+
+export type MarkovChain a = MarkovChain(List a, Stochastic, Integer)
+
+invalidateWithReason :: MarkovChain a -> Maybe MarkovError
+export invalidateWithReason = where {
+  MarkovChain(values, probs, state) =>
+    do {
+      totalValues = List.length(values)
+      return if (totalValues < 1) {
+        Just(NoValuesGiven)
+      } else if (Matrix.rows(probs) != totalValues) {
+        Just(ValueSizeNotMatched)
+      } else if (state > totalValues - 1) {
+        Just(InvalidStateValue)
+      } else {
+        Nothing
+      }
+    }
+}
+
+current :: MarkovChain a -> Maybe a
+export current = where {
+  MarkovChain(values, _, i) =>
+    List.nth(i, values)
+}
+
+isTerminal :: MarkovChain a -> Boolean
+export isTerminal = where {
+  MarkovChain(_, probs, i) =>
+    pipe(
+      List.nth(i),
+      chain(List.nth(i)),
+      map(equals(1.0)),
+      fromMaybe(false),
+    )(probs)
+}
+
+next :: Random -> MarkovChain a -> MarkovChain a
+export next = (r, mc) => where(mc) {
+  MarkovChain(values, probs, i) =>
+    pipe(
+      Matrix.selectFrom(r, i),
+      fromMaybe(i),
+      MarkovChain(values, probs),
+    )(probs)
+}
+
+nextValue :: Random -> MarkovChain a -> Maybe a
+export nextValue = (r, mc) => pipe(
+  next(r),
+  current,
+)(mc)
+
+transform :: Random -> (Integer -> Integer -> Stochastic) -> MarkovChain a -> MarkovChain a
+export transform = (r, fn, mc) => where(mc) {
+  MarkovChain(values, probs, i) =>
+    pipe(
+      Matrix.selectFrom(r, i),
+      fromMaybe(i),
+      (v) => MarkovChain(values, fn(i, v), v),
+    )(probs)
+}
