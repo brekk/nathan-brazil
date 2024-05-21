@@ -1,0 +1,50 @@
+import type { Maybe } from "Maybe"
+
+import { Just, Nothing } from "Maybe"
+
+
+
+aim2 :: (a -> a -> a) -> Maybe a -> Maybe a -> Maybe a
+export aim2 = (fn, mA, mB) => where(#[mA, mB]) {
+  #[Just(a), Just(b)] =>
+    Just(fn(a, b))
+
+  _ =>
+    Nothing
+}
+
+
+aim3 :: (a -> a -> a -> a) -> Maybe a -> Maybe a -> Maybe a -> Maybe a
+export aim3 = (fn, mA, mB, mC) => where(#[mA, mB, mC]) {
+  #[Just(a), Just(b), Just(c)] =>
+    Just(fn(a, b, c))
+
+  _ =>
+    Nothing
+}
+
+
+aim4 :: (a -> a -> a -> a -> a) -> Maybe a -> Maybe a -> Maybe a -> Maybe a -> Maybe a
+export aim4 = (fn, mA, mB, mC, mD) => where(#[mA, mB, mC, mD]) {
+  #[Just(a), Just(b), Just(c), Just(d)] =>
+    Just(fn(a, b, c, d))
+
+  _ =>
+    Nothing
+}
+
+
+aim5 :: (a -> a -> a -> a -> a -> a)
+  -> Maybe a
+  -> Maybe a
+  -> Maybe a
+  -> Maybe a
+  -> Maybe a
+  -> Maybe a
+export aim5 = (fn, mA, mB, mC, mD, mE) => where(#[mA, mB, mC, mD, mE]) {
+  #[Just(a), Just(b), Just(c), Just(d), Just(e)] =>
+    Just(fn(a, b, c, d, e))
+
+  _ =>
+    Nothing
+}

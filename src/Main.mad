@@ -1,15 +1,33 @@
 import Dict from "Dictionary"
 import IO from "IO"
+import { Just } from "Maybe"
 
-import { calculate } from "./NathanBrazil"
+import { aim2, aim4 } from "./Aim"
+import Matrix from "@/Matrix"
+
+
+
+// import { calculate } from "./NathanBrazil"
 
 
 
 main = () => {
-  d = {{ "a": 1, "b": 1, "c": 1 }}
-  IO.pTrace("insert existing?", Dict.insert("b", 2, d))
-  IO.pTrace("insert new?", Dict.insert("b", 2, d))
-  IO.pTrace("update existing?", Dict.update((i) => i + 1, "b", d))
-  IO.pTrace("update new?", Dict.update((i) => i + 1, "d", d))
-  calculate(["abcde", "fghij", "flippant"]) |> IO.pTrace("CALCULATED?")
+  dict = {{ "a": 1, "b": 1, "c": 1 }}
+  IO.pTrace("insert existing?", Dict.insert("b", 2, dict))
+  IO.pTrace("insert new?", Dict.insert("b", 2, dict))
+  IO.pTrace("update existing?", Dict.update((i) => i + 1, "b", dict))
+  IO.pTrace("update new?", Dict.update((i) => i + 1, "d", dict))
+  // calculate(["abcde", "fghij", "flippant"]) |> IO.pTrace("CALCULATED?")
+  aim2((a, b) => a * 2 - b, Just(7), Just(10)) |> IO.pTrace("aimmmm")
+  m = [[5, 3], [2, 4]]
+  IO.pTrace("mhmm", m)
+  tl = Matrix.getCell(0, 0, m)
+  IO.pTrace("TOP LEFT", tl)
+
+  br = Matrix.getCell(1, 1, m)
+  bl = Matrix.getCell(1, 0, m)
+  tr = Matrix.getCell(0, 1, m)
+  IO.pTrace("BOTTOM RIGHT", br)
+
+  aim4((a, b, c, d) => (a * b) - (c * d), tl, br, tr, bl) |> IO.pTrace("selecto!")
 }
