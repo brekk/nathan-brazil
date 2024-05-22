@@ -40,7 +40,7 @@ test(
       [0.25, 0.25, 0.25, 0.25],
       [0.25, 0.25, 0.25, 0.25],
     ]
-    return assertEquals(selectFrom(seed, 0, m), Just(3))
+    return assertEquals(selectFrom(seed, 0, m), Just(1))
   },
 )
 

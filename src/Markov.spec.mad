@@ -14,7 +14,6 @@ import {
   invalidateWithReason,
   isTerminal,
   next,
-  nextValue,
   transform,
 } from "@/Markov"
 
@@ -64,7 +63,7 @@ test(
     seed = generateFromString("next")
     return assertEquals(
       next(seed, MarkovChain(["oh", "really", "cool"], [[0, 1, 0], [0, 0, 1], [1, 0, 0]], 0)),
-      MarkovChain(["oh", "really", "cool"], [[0, 1, 0], [0, 0, 1], [1, 0, 0]], 2),
+      MarkovChain(["oh", "really", "cool"], [[0, 1, 0], [0, 0, 1], [1, 0, 0]], 1),
     )
   },
 )
