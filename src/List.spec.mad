@@ -1,0 +1,11 @@
+import String from "String"
+import { assertEquals, test } from "Test"
+
+import { mark } from "@/List"
+
+
+
+test(
+  "mark",
+  () => assertEquals(mark(String.split("", "nice")), [#[0, "n"], #[1, "i"], #[2, "c"], #[3, "e"]]),
+)
