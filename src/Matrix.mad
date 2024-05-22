@@ -2,7 +2,6 @@ import type { Maybe } from "Maybe"
 import type { Random } from "Random"
 
 import { always, equals } from "Function"
-import IO from "IO"
 import List from "List"
 import { abs, add } from "Math"
 import { Just, Nothing, fromMaybe } from "Maybe"
@@ -98,7 +97,6 @@ export select = (rowIndex, f, m) => pipe(
             if (stack.result >= 0) {
               stack
             } else do {
-              IO.pTrace("...", #[rowIndex, f, index, x])
               sum = stack.sum + x
               result = f <= sum ? index : stack.result
 

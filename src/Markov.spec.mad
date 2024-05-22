@@ -1,7 +1,8 @@
 import type { MarkovChain, MarkovError } from "@/Markov"
 import type { Stochastic } from "@/Matrix"
 
-import { Just, Nothing } from "Maybe"
+import List from "List"
+import { Just, Nothing, fromMaybe } from "Maybe"
 import { generateFromString } from "Random"
 import { assertEquals, test } from "Test"
 
@@ -16,6 +17,7 @@ import {
   next,
   transform,
 } from "@/Markov"
+import Matrix from "@/Matrix"
 
 
 
@@ -79,6 +81,33 @@ test(
         MarkovChain(["shit", "ass"], [[0, 1], [1, 0]], 0),
       ),
       MarkovChain(["shit", "ass"], [[1, 0], [0, 1]], 1),
+    )
+  },
+)
+
+test(
+  "usage",
+  () => do {
+    seed = generateFromString("mavra-chang")
+    a = Matrix.create(7, 0)
+    s = 1
+    b = pipe(
+      Matrix.setCell(0, 1, s),
+      Matrix.setCell(1, 2, s),
+      Matrix.setCell(2, 3, s),
+      Matrix.setCell(3, 0, s),
+    )(a)
+    mc = MarkovChain(["madlib", "is", "really", "cool"], b, 0)
+    matched = List.repeatWith(
+      (_) => {
+        mc := next(seed, mc)
+        return current(mc)
+      },
+      8,
+    )
+    return assertEquals(
+      map(fromMaybe("?"), matched),
+      ["is", "really", "cool", "madlib", "is", "really", "cool", "madlib"],
     )
   },
 )
