@@ -1,0 +1,6 @@
+import List from "List"
+
+
+
+mark :: List a -> List #[Integer, a]
+export mark = (list) => List.zip(List.range(0, List.length(list)), list)

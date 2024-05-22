@@ -20,30 +20,28 @@ import Matrix from "@/Matrix"
 main = () => {
   seed = generateFromString("mavra-chang")
   chance = 8
-  a = Matrix.create(7, 0)
-  s = 1
-  b = pipe(
-    Matrix.setCell(0, 1, s),
-    Matrix.setCell(1, 2, s),
-    Matrix.setCell(2, 3, s),
-    Matrix.setCell(3, 4, s),
-    Matrix.setCell(4, 5, s),
-    Matrix.setCell(5, 6, s),
-    Matrix.setCell(6, 0, s),
-  )(a)
-  mc = Markov.MarkovChain(
-    ["always", "better", "continuing", "despite", "eating", "fire", "generally"],
-    b,
-    0,
-  )
+  // a = Matrix.create(3, 0)
+  q = 1 / 4
+  h = 1 / 6
+  s = 1 / 7
+  b = [
+    [0, q, q, 0, q, 0, q],
+    [0, h, h, h, h, h, h],
+    [0, h, h, h, h, h, h],
+    [0, h, h, h, h, h, h],
+    [0, h, h, h, h, h, h],
+    [0, h, h, h, h, h, h],
+    [s, s, s, s, s, s, s],
+  ]
+  mc = Markov.MarkovChain(String.split(" ", "if can can no can no can"), b, 0)
   IO.pTrace("nathan brazil", mc)
   List.repeatWith(
     (n) => {
       mc := Markov.next(seed, mc)
-      IO.pTrace(`${show(n)} ->`, show(float(seed)))
+      // IO.pTrace(`${show(n)} ->`, show(float(seed)))
       return Markov.current(mc)
     },
-    10,
+    40,
   )
     |> IO.pTrace("mavra!")
 }

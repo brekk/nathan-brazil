@@ -4,6 +4,7 @@ import type { Stochastic } from "@/Matrix"
 import List from "List"
 import { Just, Nothing, fromMaybe } from "Maybe"
 import { generateFromString } from "Random"
+import String from "String"
 import { assertEquals, test } from "Test"
 
 import {
@@ -12,6 +13,10 @@ import {
   NoValuesGiven,
   ValueSizeNotMatched,
   current,
+  empty,
+  getMatrix,
+  getState,
+  getValues,
   invalidateWithReason,
   isTerminal,
   next,
@@ -111,3 +116,14 @@ test(
     )
   },
 )
+
+test("empty", () => assertEquals(empty(), MarkovChain([], [], 0)))
+
+test(
+  "getValues",
+  () => assertEquals(getValues(MarkovChain(String.split("", "abc"), [], 0)), ["a", "b", "c"]),
+)
+
+test("getMatrix", () => assertEquals(getMatrix(empty()), []))
+
+test("getState", () => assertEquals(getState(empty()), 0))

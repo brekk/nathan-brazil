@@ -4,11 +4,14 @@ import type { Random } from "Random"
 
 import type { Stochastic } from "@/Matrix"
 
+import Dict from "Dictionary"
 import { equals } from "Function"
 import List from "List"
 import { Just, Nothing, fromMaybe } from "Maybe"
 import String from "String"
 
+import { justGet } from "@/Dictionary"
+import { mark } from "@/List"
 import Matrix from "@/Matrix"
 
 
@@ -17,11 +20,75 @@ export type MarkovError = NoValuesGiven | ValueSizeNotMatched | InvalidStateValu
 
 export type MarkovChain a = MarkovChain(List a, Stochastic, Integer)
 
+getValues :: MarkovChain a -> List a
+export getValues = where {
+  MarkovChain(v, _, _) =>
+    v
+}
+
+getMatrix :: MarkovChain a -> Stochastic
+export getMatrix = where {
+  MarkovChain(_, m, _) =>
+    m
+}
+
+getState :: MarkovChain a -> Integer
+export getState = where {
+  MarkovChain(_, _, i) =>
+    i
+}
+/*
+upsertKey :: String -> Letterbox -> Letterbox
+export upsertKey = (str, dict) => pipe(
+  Dict.get($, dict),
+  where {
+    Just(x) =>
+      x + 1
+
+    _ =>
+      1
+  },
+  Dict.insert(str, $, dict),
+)(str)
+*/
+/*
+['a']
+[[1]]
+
+['a', 'b']
+[
+[0, 1],
+[1, 0]
+]
+
+['a', 'b', 'c']
+[
+  [0, 1, 0],
+  [0, 0, 1],
+  [1, 0, 0]
+]
+
+['a', 'b', 'c', 'd']
+[
+  [0, 1, 0, 0],
+  [0, 0, 1, 0],
+  [0, 0, 0, 1],
+  [1, 0, 0, 0],
+]
+
+['a', 'b', 'a']
+[
+  [0, 1, 0],
+  [0.5, 0, 0.5],
+  [1, 0, 0],
+]
+*/
+
 invalidateWithReason :: MarkovChain a -> Maybe MarkovError
 export invalidateWithReason = where {
-  MarkovChain(values, probs, state) =>
+  MarkovChain(v, probs, state) =>
     do {
-      totalValues = List.length(values)
+      totalValues = List.length(v)
       return if (totalValues < 1) {
         Just(NoValuesGiven)
       } else if (Matrix.rows(probs) != totalValues) {
@@ -33,6 +100,9 @@ export invalidateWithReason = where {
       }
     }
 }
+
+empty :: {} -> MarkovChain a
+export empty = () => MarkovChain([], [], 0)
 
 current :: MarkovChain a -> Maybe a
 export current = where {
@@ -70,3 +140,32 @@ export transform = (r, fn, mc) => where(mc) {
       (v) => MarkovChain(values, fn(i, v), v),
     )(probs)
 }
+
+/*
+
+consume :: List a -> Stochastic
+consume = (strings) => {
+len = List.length(strings)
+  return pipe(
+  mark,
+  List.reduce(
+    (iter, tuple) => where(tuple) {
+      #[i, str] =>
+        do {
+          pipe(
+            justGet(iter.dict)
+            where {
+              Just(row) => 
+            }
+          )(iter.prev)
+        }
+
+      _ =>
+        iter
+    },
+    { dict: {{}}, prev: Nothing },
+  ),
+  .stack,
+)(strings)
+}
+*/

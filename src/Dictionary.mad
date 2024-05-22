@@ -1,0 +1,8 @@
+import type { Maybe } from "Maybe"
+
+import { get } from "Dictionary"
+
+
+
+justGet :: Comparable a => Maybe a -> Dictionary a b -> Maybe b
+export justGet = (jKey, dict) => chain(get($, dict))(jKey)

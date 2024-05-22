@@ -7,6 +7,8 @@ import { abs, add } from "Math"
 import { Just, Nothing, fromMaybe } from "Maybe"
 import { float } from "Random"
 
+import { mark } from "@/List"
+
 
 
 export alias Matrix a = List (List a)
@@ -68,11 +70,11 @@ export isProbabilisticRow = (floats) => (
 isProbabilistic :: Stochastic -> Boolean
 export isProbabilistic = List.all(isProbabilisticRow)
 
-validate :: Stochastic -> Boolean
-export validate = (m) => !List.isEmpty(m) && isProbabilistic(m) && isSquare(m)
+invalidate :: Stochastic -> Boolean
+export invalidate = (m) => List.isEmpty(m) || !isProbabilistic(m) || !isSquare(m)
 
-validateWithReason :: Stochastic -> Maybe String
-export validateWithReason = (m) => if (List.isEmpty(m)) {
+invalidateWithReason :: Stochastic -> Maybe String
+export invalidateWithReason = (m) => if (List.isEmpty(m)) {
   Just("Matrix cannot be empty")
 } else if (!isProbabilistic(m)) {
   Just("Matrix must have rows which add up to 1")
@@ -90,7 +92,7 @@ export select = (rowIndex, f, m) => pipe(
   getRow(rowIndex),
   map(
     pipe(
-      (row) => List.zip(List.range(0, List.length(row)), row),
+      mark,
       List.reduce(
         (stack, indexed) => where(indexed) {
           #[index, x] =>
