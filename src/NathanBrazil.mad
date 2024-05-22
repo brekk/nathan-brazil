@@ -1,10 +1,20 @@
-import type { Maybe } from "Maybe"
-
-import Dict from "Dictionary"
-import { equals } from "Function"
-import List from "List"
-import { Just, Nothing } from "Maybe"
-import String from "String"
+import { current, invalidateWithReason, isTerminal, next, nextValue, transform } from "@/Markov"
+import {
+  columns,
+  create,
+  getCell,
+  inUnitInterval,
+  isProbabilistic,
+  isProbabilisticRow,
+  isSquare,
+  rows,
+  select,
+  selectFrom,
+  setCell,
+  setRow,
+  validate,
+  validateWithReason,
+} from "@/Matrix"
 
 
 

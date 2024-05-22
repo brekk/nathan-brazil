@@ -58,15 +58,10 @@ export next = (r, mc) => where(mc) {
     pipe(
       Matrix.selectFrom(r, i),
       fromMaybe(i),
+      IO.pTrace(`magic! (${show(i)})`),
       MarkovChain(values, probs),
     )(probs)
 }
-
-nextValue :: Random -> MarkovChain a -> Maybe a
-export nextValue = (r, mc) => pipe(
-  next(r),
-  current,
-)(mc)
 
 transform :: Random -> (Integer -> Integer -> Stochastic) -> MarkovChain a -> MarkovChain a
 export transform = (r, fn, mc) => where(mc) {

@@ -70,17 +70,6 @@ test(
 )
 
 test(
-  "nextValue",
-  () => do {
-    seed = generateFromString("next")
-    return assertEquals(
-      nextValue(seed, MarkovChain(["oh", "really", "cool"], [[0, 1, 0], [0, 0, 1], [1, 0, 0]], 0)),
-      Just("cool"),
-    )
-  },
-)
-
-test(
   "transform",
   () => do {
     seed = generateFromString("next")

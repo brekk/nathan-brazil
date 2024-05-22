@@ -1,8 +1,14 @@
+import type { MarkovChain } from "@/Markov"
+import type { Stochastic } from "@/Matrix"
+
 import Dict from "Dictionary"
 import IO from "IO"
+import List from "List"
 import { Just } from "Maybe"
+import { float, generateFromString } from "Random"
+import String from "String"
 
-import { aim2, aim4 } from "./Aim"
+import Markov from "@/Markov"
 import Matrix from "@/Matrix"
 
 
@@ -12,22 +18,32 @@ import Matrix from "@/Matrix"
 
 
 main = () => {
-  dict = {{ "a": 1, "b": 1, "c": 1 }}
-  IO.pTrace("insert existing?", Dict.insert("b", 2, dict))
-  IO.pTrace("insert new?", Dict.insert("b", 2, dict))
-  IO.pTrace("update existing?", Dict.update((i) => i + 1, "b", dict))
-  IO.pTrace("update new?", Dict.update((i) => i + 1, "d", dict))
-  // calculate(["abcde", "fghij", "flippant"]) |> IO.pTrace("CALCULATED?")
-  aim2((a, b) => a * 2 - b, Just(7), Just(10)) |> IO.pTrace("aimmmm")
-  m = [[5, 3], [2, 4]]
-  IO.pTrace("mhmm", m)
-  tl = Matrix.getCell(0, 0, m)
-  IO.pTrace("TOP LEFT", tl)
-
-  br = Matrix.getCell(1, 1, m)
-  bl = Matrix.getCell(1, 0, m)
-  tr = Matrix.getCell(0, 1, m)
-  IO.pTrace("BOTTOM RIGHT", br)
-
-  aim4((a, b, c, d) => (a * b) - (c * d), tl, br, tr, bl) |> IO.pTrace("selecto!")
+  seed = generateFromString("mavra-chang")
+  chance = 8
+  a = Matrix.create(7, 0)
+  s = 1
+  b = pipe(
+    Matrix.setCell(0, 1, s),
+    Matrix.setCell(1, 2, s),
+    Matrix.setCell(2, 3, s),
+    Matrix.setCell(3, 4, s),
+    Matrix.setCell(4, 5, s),
+    Matrix.setCell(5, 6, s),
+    Matrix.setCell(6, 0, s),
+  )(a)
+  mc = Markov.MarkovChain(
+    ["always", "better", "continuing", "despite", "eating", "fire", "generally"],
+    b,
+    0,
+  )
+  IO.pTrace("nathan brazil", mc)
+  List.repeatWith(
+    (n) => {
+      mc := Markov.next(seed, mc)
+      IO.pTrace(`${show(n)} ->`, show(float(seed)))
+      return Markov.current(mc)
+    },
+    10,
+  )
+    |> IO.pTrace("mavra!")
 }
