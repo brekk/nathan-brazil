@@ -8,6 +8,7 @@ import { assertEquals, test } from "Test"
 import {
   columns,
   create,
+  createSequential,
   getCell,
   invalidate,
   invalidateWithReason,
@@ -79,4 +80,20 @@ test(
     _ <- assertEquals(invalidateWithReason([[0, 1], [0, 1, 0]]), Just("Matrix must be square"))
     return assertEquals(invalidateWithReason([]), Just("Matrix cannot be empty"))
   },
+)
+
+test(
+  "createSequential",
+  () => assertEquals(
+    createSequential(7),
+    [
+      [0, 1, 0, 0, 0, 0, 0],
+      [0, 0, 1, 0, 0, 0, 0],
+      [0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 0, 1, 0, 0],
+      [0, 0, 0, 0, 0, 1, 0],
+      [0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0],
+    ],
+  ),
 )

@@ -142,30 +142,14 @@ export transform = (r, fn, mc) => where(mc) {
 }
 
 /*
-
 consume :: List a -> Stochastic
 consume = (strings) => {
 len = List.length(strings)
   return pipe(
-  mark,
-  List.reduce(
-    (iter, tuple) => where(tuple) {
-      #[i, str] =>
-        do {
-          pipe(
-            justGet(iter.dict)
-            where {
-              Just(row) => 
-            }
-          )(iter.prev)
-        }
-
-      _ =>
-        iter
-    },
-    { dict: {{}}, prev: Nothing },
-  ),
-  .stack,
-)(strings)
+    mark,
+    map(where {
+      #[i, x] => 
+    })
+  )(strings)
 }
 */

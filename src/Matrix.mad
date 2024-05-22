@@ -1,6 +1,7 @@
 import type { Maybe } from "Maybe"
 import type { Random } from "Random"
 
+import Float from "Float"
 import { always, equals } from "Function"
 import List from "List"
 import { abs, add } from "Math"
@@ -17,6 +18,13 @@ export alias Stochastic = Matrix Float
 
 create :: Integer -> Float -> Stochastic
 export create = (n, fill) => List.repeatWith((_) => List.repeatWith(always(fill), n), n)
+
+createSequential :: Integer -> Stochastic
+export createSequential = (len) => pipe(
+  create($, 0),
+  List.mapWithIndex((x, i) => List.set(i == len - 1 ? 0 : i + 1, 1, x)),
+)(len)
+
 
 isSquare :: Stochastic -> Boolean
 export isSquare = (matrix) => {

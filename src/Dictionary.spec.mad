@@ -1,0 +1,15 @@
+import { Just, Nothing } from "Maybe"
+import { assertEquals, test } from "Test"
+
+import { justGet } from "@/Dictionary"
+
+
+
+test(
+  "justGet",
+  () => do {
+    ref = {{ "a": 0, "b": 1, "c": 2, "d": 3, "e": 4 }}
+    _ <- assertEquals(justGet(Nothing, ref), Nothing)
+    return assertEquals(justGet(Just("c"), ref), Just(2))
+  },
+)
