@@ -1,0 +1,49 @@
+import List from "List"
+import { fromMaybe } from "Maybe"
+import { generateFromString, pick } from "Random"
+import String from "String"
+import { assertEquals, test } from "Test"
+
+import { histogram, indexedHistogram } from "@/Stats"
+
+
+
+test(
+  "histogram",
+  () => do {
+    seed = generateFromString("histogram")
+    raw = pipe(
+      List.repeatWith((_) => pick(String.split("", "abcdefghijklmnopqrstuvwxyz"), seed)),
+      map(fromMaybe("?")),
+    )(10)
+    return assertEquals(
+      histogram(raw),
+      {{ "e": 2, "f": 1, "h": 1, "i": 1, "p": 1, "s": 1, "u": 1, "x": 1, "z": 1 }},
+    )
+  },
+)
+
+test(
+  "indexedHistogram",
+  () => do {
+    seed = generateFromString("histogram")
+    raw = pipe(
+      List.repeatWith((_) => pick(String.split("", "abcdefghijklmnopqrstuvwxyz"), seed)),
+      map(fromMaybe("?")),
+    )(10)
+    return assertEquals(
+      indexedHistogram(raw),
+      {{
+        "e": [5, 7],
+        "f": [0],
+        "h": [6],
+        "i": [1],
+        "p": [3],
+        "s": [8],
+        "u": [4],
+        "x": [2],
+        "z": [9],
+      }},
+    )
+  },
+)

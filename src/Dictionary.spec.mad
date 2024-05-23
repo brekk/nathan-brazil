@@ -1,7 +1,7 @@
 import { Just, Nothing } from "Maybe"
 import { assertEquals, test } from "Test"
 
-import { justGet } from "@/Dictionary"
+import { justGet, set } from "@/Dictionary"
 
 
 
@@ -11,5 +11,14 @@ test(
     ref = {{ "a": 0, "b": 1, "c": 2, "d": 3, "e": 4 }}
     _ <- assertEquals(justGet(Nothing, ref), Nothing)
     return assertEquals(justGet(Just("c"), ref), Just(2))
+  },
+)
+
+test(
+  "set",
+  () => do {
+    raw = {{ "a": 1, "b": 1, "c": 1 }}
+    _ <- assertEquals(set("b", 100, raw), {{ "a": 1, "b": 100, "c": 1 }})
+    return assertEquals(set("d", 100, raw), {{ "a": 1, "b": 1, "c": 1, "d": 100 }})
   },
 )

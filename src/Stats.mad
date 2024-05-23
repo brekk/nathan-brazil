@@ -1,0 +1,37 @@
+import Dict from "Dictionary"
+import List from "List"
+import { fromMaybe } from "Maybe"
+
+import { mark } from "@/List"
+
+
+
+export alias IndexedHistogram a = Dictionary a (List Integer)
+
+indexedHistogram :: Comparable a => List a -> IndexedHistogram a
+export indexedHistogram = pipe(
+  mark,
+  List.reduce(
+    (dict, tpl) => where(tpl) {
+      #[i, key] =>
+        pipe(
+          Dict.get(key),
+          map(List.append(i)),
+          fromMaybe([i]),
+          Dict.insert(key, $, dict),
+        )(dict)
+    },
+    Dict.empty,
+  ),
+)
+
+histogram :: Comparable a => List a -> Dictionary a Integer
+export histogram = List.reduce(
+  (dict, key) => pipe(
+    Dict.get(key),
+    map((i) => i + 1),
+    fromMaybe(1),
+    Dict.insert(key, $, dict),
+  )(dict),
+  Dict.empty,
+)

@@ -1,6 +1,3 @@
-import type { MarkovChain, MarkovError } from "@/Markov"
-import type { Stochastic } from "@/Matrix"
-
 import List from "List"
 import { Just, Nothing, fromMaybe } from "Maybe"
 import { generateFromString } from "Random"
@@ -12,6 +9,8 @@ import {
   MarkovChain,
   NoValuesGiven,
   ValueSizeNotMatched,
+  consume,
+  consumer,
   current,
   empty,
   getMatrix,
@@ -127,3 +126,22 @@ test(
 test("getMatrix", () => assertEquals(getMatrix(empty()), []))
 
 test("getState", () => assertEquals(getState(empty()), 0))
+
+test(
+  "consume",
+  () => assertEquals(
+    consume(String.split(" ", "she sells sea shells on the sea shore")),
+    [
+      [0, 1, 0, 0, 0, 0, 0, 0],
+      [0, 0, 1, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0.5, 0, 0, 0, 0.5],
+      [0, 0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 1, 0, 0],
+      [0, 0, 0, 0, 0, 0, 1, 0],
+      [0, 0, 0, 0.5, 0, 0, 0, 0.5],
+      [1, 0, 0, 0, 0, 0, 0, 0],
+    ],
+  ),
+)
+
+test("consumer", () => assertEquals(consumer(-1, "", {{}}, []), []))

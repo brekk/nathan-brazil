@@ -3,16 +3,19 @@ import type { Maybe } from "Maybe"
 import type { Random } from "Random"
 
 import type { Stochastic } from "@/Matrix"
+import type { IndexedHistogram } from "@/Stats"
 
 import Dict from "Dictionary"
 import { equals } from "Function"
 import List from "List"
+import { add } from "Math"
 import { Just, Nothing, fromMaybe } from "Maybe"
 import String from "String"
 
 import { justGet } from "@/Dictionary"
 import { mark } from "@/List"
 import Matrix from "@/Matrix"
+import { indexedHistogram } from "@/Stats"
 
 
 
@@ -37,20 +40,7 @@ export getState = where {
   MarkovChain(_, _, i) =>
     i
 }
-/*
-upsertKey :: String -> Letterbox -> Letterbox
-export upsertKey = (str, dict) => pipe(
-  Dict.get($, dict),
-  where {
-    Just(x) =>
-      x + 1
 
-    _ =>
-      1
-  },
-  Dict.insert(str, $, dict),
-)(str)
-*/
 /*
 ['a']
 [[1]]
@@ -141,15 +131,34 @@ export transform = (r, fn, mc) => where(mc) {
     )(probs)
 }
 
-/*
-consume :: List a -> Stochastic
-consume = (strings) => {
-len = List.length(strings)
+consumer :: Integer -> String -> IndexedHistogram String -> Stochastic -> Stochastic
+export consumer = (i, str, hist, matrix) => where(#[List.nth(i, matrix), Dict.get(str, hist)]) {
+  #[Just(row), Just(indices)] =>
+    List.set(
+      i,
+      List.mapWithIndex(
+        (x, index) => List.includes(index, map(add(1), indices)) ? 1 / List.length(indices) : x,
+        row,
+      ),
+      matrix,
+    )
+
+  _ =>
+    matrix
+}
+
+consume :: List String -> Stochastic
+export consume = (strings) => {
+  len = List.length(strings)
+  hist = indexedHistogram(strings)
   return pipe(
     mark,
-    map(where {
-      #[i, x] => 
-    })
+    List.reduce(
+      (matrix, tuple) => where(tuple) {
+        #[i, str] =>
+          consumer(i, str, hist, matrix)
+      },
+      Matrix.createSequential(len),
+    ),
   )(strings)
 }
-*/

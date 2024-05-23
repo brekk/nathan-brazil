@@ -1,8 +1,23 @@
 import type { Maybe } from "Maybe"
 
-import { get } from "Dictionary"
+import { get, insert } from "Dictionary"
+import { Just, Nothing } from "Maybe"
 
 
 
 justGet :: Comparable a => Maybe a -> Dictionary a b -> Maybe b
 export justGet = (jKey, dict) => chain(get($, dict))(jKey)
+
+
+set :: Comparable a => a -> b -> Dictionary a b -> Dictionary a b
+export set = (k, v, dict) => pipe(
+  get($, dict),
+  where {
+    Nothing =>
+      v
+
+    _ =>
+      v
+  },
+  insert(k, $, dict),
+)(k)
