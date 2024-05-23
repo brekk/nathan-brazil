@@ -9,7 +9,6 @@ import {
   MarkovChain,
   NoValuesGiven,
   ValueSizeNotMatched,
-  consume,
   current,
   empty,
   getMatrix,
@@ -19,7 +18,6 @@ import {
   isTerminal,
   next,
   transform,
-  updateProbabilityRow,
 } from "@/Markov"
 import Matrix from "@/Matrix"
 
@@ -126,22 +124,3 @@ test(
 test("getMatrix", () => assertEquals(getMatrix(empty()), []))
 
 test("getState", () => assertEquals(getState(empty()), 0))
-
-test(
-  "consume",
-  () => assertEquals(
-    consume(String.split(" ", "she sells sea shells on the sea shore")),
-    [
-      [0, 1, 0, 0, 0, 0, 0, 0],
-      [0, 0, 1, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0.5, 0, 0, 0, 0.5],
-      [0, 0, 0, 0, 1, 0, 0, 0],
-      [0, 0, 0, 0, 0, 1, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 0],
-      [0, 0, 0, 0.5, 0, 0, 0, 0.5],
-      [1, 0, 0, 0, 0, 0, 0, 0],
-    ],
-  ),
-)
-
-test("updateProbabilityRow", () => assertEquals(updateProbabilityRow({{}}, [], -1, ""), []))

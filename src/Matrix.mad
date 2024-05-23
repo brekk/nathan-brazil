@@ -1,6 +1,9 @@
 import type { Maybe } from "Maybe"
 import type { Random } from "Random"
 
+import type { IndexedHistogram } from "@/Stats"
+
+import Dict from "Dictionary"
 import Float from "Float"
 import { always, equals } from "Function"
 import List from "List"
@@ -9,6 +12,7 @@ import { Just, Nothing, fromMaybe } from "Maybe"
 import { float } from "Random"
 
 import { mark } from "@/List"
+import { indexedHistogram } from "@/Stats"
 
 
 
@@ -128,3 +132,45 @@ export setRow = (rowIndex, newRow, matrix) => List.mapWithIndex(
   (x, i) => i == rowIndex ? newRow : x,
   matrix,
 )
+
+calculateProbability :: List Integer -> Float -> Integer -> Float
+export calculateProbability = (indices, raw, index) => pipe(
+  map(add(1)),
+  List.includes(index),
+  (included) => if (included) {
+    1 / List.length(indices)
+  } else {
+    raw
+  },
+)(indices)
+
+updateProbabilityRow :: IndexedHistogram String -> Stochastic -> Integer -> String -> Stochastic
+export updateProbabilityRow = (hist, matrix, position, str) => where(#[
+  List.nth(position, matrix),
+  Dict.get(str, hist),
+]) {
+  #[Just(row), Just(indices)] =>
+    pipe(
+      List.mapWithIndex(calculateProbability(indices)),
+      List.set(position, $, matrix),
+    )(row)
+
+  _ =>
+    matrix
+}
+
+consume :: List String -> Stochastic
+export consume = (strings) => {
+  len = List.length(strings)
+  hist = indexedHistogram(strings)
+  return pipe(
+    mark,
+    List.reduce(
+      (matrix, tuple) => where(tuple) {
+        #[i, str] =>
+          updateProbabilityRow(hist, matrix, i, str)
+      },
+      createSequential(len),
+    ),
+  )(strings)
+}

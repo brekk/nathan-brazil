@@ -1,12 +1,15 @@
 import type { Matrix } from "./Matrix"
 
+import Dict from "Dictionary"
 import List from "List"
 import { Just, Nothing } from "Maybe"
 import { generateFromString } from "Random"
+import String from "String"
 import { assertEquals, test } from "Test"
 
 import {
   columns,
+  consume,
   create,
   createSequential,
   getCell,
@@ -17,6 +20,7 @@ import {
   selectFrom,
   setCell,
   setRow,
+  updateProbabilityRow,
 } from "./Matrix"
 
 
@@ -97,3 +101,22 @@ test(
     ],
   ),
 )
+
+test(
+  "consume",
+  () => assertEquals(
+    consume(String.split(" ", "she sells sea shells on the sea shore")),
+    [
+      [0, 1, 0, 0, 0, 0, 0, 0],
+      [0, 0, 1, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0.5, 0, 0, 0, 0.5],
+      [0, 0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 1, 0, 0],
+      [0, 0, 0, 0, 0, 0, 1, 0],
+      [0, 0, 0, 0.5, 0, 0, 0, 0.5],
+      [1, 0, 0, 0, 0, 0, 0, 0],
+    ],
+  ),
+)
+
+test("updateProbabilityRow", () => assertEquals(updateProbabilityRow({{}}, [], -1, ""), []))
