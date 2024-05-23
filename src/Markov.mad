@@ -41,39 +41,6 @@ export getState = where {
     i
 }
 
-/*
-['a']
-[[1]]
-
-['a', 'b']
-[
-[0, 1],
-[1, 0]
-]
-
-['a', 'b', 'c']
-[
-  [0, 1, 0],
-  [0, 0, 1],
-  [1, 0, 0]
-]
-
-['a', 'b', 'c', 'd']
-[
-  [0, 1, 0, 0],
-  [0, 0, 1, 0],
-  [0, 0, 0, 1],
-  [1, 0, 0, 0],
-]
-
-['a', 'b', 'a']
-[
-  [0, 1, 0],
-  [0.5, 0, 0.5],
-  [1, 0, 0],
-]
-*/
-
 invalidateWithReason :: MarkovChain a -> Maybe MarkovError
 export invalidateWithReason = where {
   MarkovChain(v, probs, state) =>
@@ -131,17 +98,27 @@ export transform = (r, fn, mc) => where(mc) {
     )(probs)
 }
 
-consumer :: Integer -> String -> IndexedHistogram String -> Stochastic -> Stochastic
-export consumer = (i, str, hist, matrix) => where(#[List.nth(i, matrix), Dict.get(str, hist)]) {
+calculateProbability :: List Integer -> Float -> Integer -> Float
+calculateProbability = (indices, raw, index) => pipe(
+  map(add(1)),
+  List.includes(index),
+  (included) => if (included) {
+    1 / List.length(indices)
+  } else {
+    raw
+  },
+)(indices)
+
+updateProbabilityRow :: IndexedHistogram String -> Stochastic -> Integer -> String -> Stochastic
+export updateProbabilityRow = (hist, matrix, position, str) => where(#[
+  List.nth(position, matrix),
+  Dict.get(str, hist),
+]) {
   #[Just(row), Just(indices)] =>
-    List.set(
-      i,
-      List.mapWithIndex(
-        (x, index) => List.includes(index, map(add(1), indices)) ? 1 / List.length(indices) : x,
-        row,
-      ),
-      matrix,
-    )
+    pipe(
+      List.mapWithIndex(calculateProbability(indices)),
+      List.set(position, $, matrix),
+    )(row)
 
   _ =>
     matrix
@@ -156,7 +133,7 @@ export consume = (strings) => {
     List.reduce(
       (matrix, tuple) => where(tuple) {
         #[i, str] =>
-          consumer(i, str, hist, matrix)
+          updateProbabilityRow(hist, matrix, i, str)
       },
       Matrix.createSequential(len),
     ),
